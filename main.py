@@ -1,15 +1,21 @@
 from flask import Flask, jsonify
 from faker import Faker
 import random
+import os
 
 app = Flask(__name__)
 fake = Faker('pt_BR')
-fake.use_english = False
 
 dominios = ['gmail.com', 'hotmail.com', 'outlook.com', 'yahoo.com', 'live.com']
 
+MAX_PESSOAS = 1000
+
+
 @app.route('/api/pessoas/<int:num_pessoas>', methods=['GET'])
 def obter_pessoas(num_pessoas):
+    if not (1 <= num_pessoas <= MAX_PESSOAS):
+        return jsonify({'erro': f'num_pessoas deve estar entre 1 e {MAX_PESSOAS}'}), 400
+
     pessoas = []
 
     for _ in range(num_pessoas):
@@ -27,5 +33,24 @@ def obter_pessoas(num_pessoas):
 
     return jsonify(pessoas), 200
 
+
+@app.errorhandler(404)
+def nao_encontrado(e):
+    return jsonify({'erro': 'Rota não encontrada'}), 404
+
+
+@app.errorhandler(405)
+def metodo_nao_permitido(e):
+    return jsonify({'erro': 'Método não permitido'}), 405
+
+
+@app.errorhandler(500)
+def erro_interno(e):
+    return jsonify({'erro': 'Erro interno do servidor'}), 500
+
+
 if __name__ == '__main__':
-    app.run()
+    debug = os.getenv('FLASK_DEBUG', 'false').lower() == 'true'
+    host = os.getenv('FLASK_HOST', '0.0.0.0')
+    port = int(os.getenv('FLASK_PORT', '5000'))
+    app.run(debug=debug, host=host, port=port)

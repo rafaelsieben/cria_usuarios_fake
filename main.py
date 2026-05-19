@@ -1,4 +1,4 @@
-from flask import Flask, jsonify
+from flask import Flask, jsonify, send_from_directory
 from faker import Faker
 import random
 import os
@@ -9,6 +9,26 @@ fake = Faker('pt_BR')
 dominios = ['gmail.com', 'hotmail.com', 'outlook.com', 'yahoo.com', 'live.com']
 
 MAX_PESSOAS = 1000
+
+
+@app.route('/')
+def index():
+    return send_from_directory('static', 'index.html')
+
+
+@app.route('/ios-frame.jsx')
+def ios_frame():
+    return send_from_directory('static', 'ios-frame.jsx', mimetype='text/javascript')
+
+
+@app.route('/app/<path:filename>')
+def app_files(filename):
+    return send_from_directory('static/app', filename, mimetype='text/javascript')
+
+
+@app.route('/assets/<path:filename>')
+def asset_files(filename):
+    return send_from_directory('static/assets', filename)
 
 
 @app.route('/api/pessoas/<int:num_pessoas>', methods=['GET'])
